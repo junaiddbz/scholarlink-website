@@ -33,9 +33,10 @@ export function FacultyModal({ faculty, onClose }: FacultyModalProps) {
   const hasAnyContactDetails = hasPhone || hasEmail || hasWhatsapp;
 
   useEffect(() => {
-    if (!faculty) {
-      return;
-    }
+    const isOpen = Boolean(faculty);
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevBodyOverscroll = document.body.style.overscrollBehavior;
+    const prevDocOverflow = document.documentElement.style.overflow;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -43,12 +44,28 @@ export function FacultyModal({ faculty, onClose }: FacultyModalProps) {
       }
     };
 
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
+    document.body.classList.toggle("course-modal-open", isOpen);
+
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.overscrollBehavior = "none";
+      document.documentElement.style.overflow = "hidden";
+      window.addEventListener("keydown", onKeyDown);
+    } else {
+      document.body.style.overflow = prevBodyOverflow;
+      document.body.style.overscrollBehavior = prevBodyOverscroll;
+      document.documentElement.style.overflow = prevDocOverflow;
+    }
+
+    window.dispatchEvent(new CustomEvent("course-modal-state", { detail: { open: isOpen } }));
 
     return () => {
-      document.body.style.overflow = "";
+      document.body.classList.remove("course-modal-open");
+      document.body.style.overflow = prevBodyOverflow;
+      document.body.style.overscrollBehavior = prevBodyOverscroll;
+      document.documentElement.style.overflow = prevDocOverflow;
       window.removeEventListener("keydown", onKeyDown);
+      window.dispatchEvent(new CustomEvent("course-modal-state", { detail: { open: false } }));
     };
   }, [faculty, onClose]);
 
@@ -56,24 +73,26 @@ export function FacultyModal({ faculty, onClose }: FacultyModalProps) {
     <AnimatePresence>
       {faculty ? (
         <motion.div
-          className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm p-2 sm:p-6 lg:p-10 flex items-end sm:items-center justify-center"
+          className="fixed inset-0 z-[70] flex items-end justify-center bg-black/55 p-0 backdrop-blur-0 sm:items-center sm:p-6 sm:backdrop-blur-sm lg:p-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
           onClick={onClose}
           role="dialog"
           aria-modal="true"
           aria-labelledby="faculty-modal-title"
         >
           <motion.div
-            className="modal-panel w-full max-h-[88vh] max-w-2xl overflow-y-auto rounded-t-[1.5rem] sm:max-h-[90vh] sm:rounded-[1.75rem]"
-            initial={{ y: 30, opacity: 0, scale: 0.98 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 30, opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.25 }}
+            className="modal-panel flex w-full max-h-[92vh] max-w-2xl flex-col overflow-hidden rounded-t-[1.5rem] sm:max-h-[90vh] sm:rounded-[1.75rem]"
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 16, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 340, damping: 34, mass: 0.8 }}
+            style={{ willChange: "transform, opacity" }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-primary/10 p-4 dark:border-white/10 sm:p-7">
+            <div className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-primary/10 bg-white/92 p-4 dark:border-white/10 dark:bg-slate-900/90 sm:bg-transparent sm:p-7 sm:dark:bg-transparent">
               <div>
                 <p className="text-[11px] uppercase tracking-widest font-bold text-accent mb-2">
                   {faculty.group === "academy-head" ? "Academy Leadership" : "General Faculty"}
@@ -95,7 +114,7 @@ export function FacultyModal({ faculty, onClose }: FacultyModalProps) {
               </button>
             </div>
 
-            <div className="p-4 sm:p-7 space-y-5">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-7 sm:pb-7">
               <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full overflow-hidden ring-4 ring-accent/30 shadow-lg">
                 <Image
                   src={getFacultyImage(faculty)}

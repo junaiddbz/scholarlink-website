@@ -28,7 +28,7 @@ type ApplicationFormState = {
 const processSteps = [
   { number: "01", title: "Submit Application", detail: "Share student details and goals." },
   { number: "02", title: "Academic Review", detail: "We assess goals, level, and fit." },
-  { number: "03", title: "Guidance Call", detail: "Parent and student consultation." },
+  { number: "03", title: "Free Demo Session", detail: "Attend a trial class before enrollment." },
   { number: "04", title: "Onboarding", detail: "Batch placement and class start." },
 ];
 

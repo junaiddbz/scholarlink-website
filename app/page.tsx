@@ -26,12 +26,17 @@ export default function Home() {
 
       <main id="main-content" tabIndex={-1} className="min-h-screen pt-28 pb-20 focus:outline-none lg:pb-12">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 grid items-stretch gap-5 lg:mb-14 lg:grid-cols-12 lg:gap-6">
+          <div className="mb-8 grid items-stretch gap-4 sm:mb-10 sm:gap-5 lg:mb-14 lg:grid-cols-12 lg:gap-6">
             <Hero />
+            <div className="lg:hidden">
+              <AnnouncementRail sectionId="announcements-mobile" className="mb-0" />
+            </div>
             <TrustSignals />
           </div>
 
-          <AnnouncementRail />
+          <div className="hidden lg:block">
+            <AnnouncementRail />
+          </div>
           <CourseCatalog />
           <Faculty />
           <ReviewTeaser />

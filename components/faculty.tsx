@@ -37,7 +37,7 @@ export function Faculty() {
   };
 
   return (
-    <section id="faculty" className="mb-12 scroll-mt-28 lg:mb-14" ref={ref}>
+    <section id="faculty" className="mb-8 scroll-mt-28 sm:mb-10 lg:mb-14" ref={ref}>
       <motion.div
         className="home-panel relative overflow-hidden rounded-[2.4rem] p-6 sm:p-8 lg:p-12"
         initial={{ opacity: 0, scale: 0.95 }}

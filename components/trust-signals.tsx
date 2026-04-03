@@ -12,7 +12,7 @@ export function TrustSignals() {
   return (
     <motion.aside
       ref={ref}
-      className="lg:col-span-4 mt-6 lg:mt-0 flex flex-col gap-4 2xl:h-[560px]"
+      className="mt-0 flex flex-col gap-4 lg:col-span-4 2xl:h-[560px]"
       initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.45 }}

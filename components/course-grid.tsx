@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { type Course, type CourseCategory } from "@/lib/courses";
@@ -9,23 +9,143 @@ import { CourseCard } from "@/components/course-card";
 import { CourseModal } from "@/components/course-modal";
 import { useCatalogData } from "@/hooks/use-catalog-data";
 
+function normalizeCategoryToken(value?: string | null) {
+  if (!value) {
+    return "";
+  }
+
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function matchesTokenWithAliases(titleToken: string, requestedToken: string) {
+  if (!requestedToken) {
+    return false;
+  }
+
+  if (titleToken.includes(requestedToken)) {
+    return true;
+  }
+
+  if (requestedToken === "academic") {
+    return titleToken.includes("academic") || titleToken.includes("tutoring");
+  }
+
+  if (requestedToken === "language") {
+    return titleToken.includes("language") || titleToken.includes("ielts");
+  }
+
+  if (requestedToken === "quran") {
+    return titleToken.includes("quran") || titleToken.includes("quraan");
+  }
+
+  if (requestedToken === "computer") {
+    return titleToken.includes("computer") || titleToken.includes("programming") || titleToken.includes("it");
+  }
+
+  if (requestedToken === "media") {
+    return (
+      titleToken.includes("media") ||
+      titleToken.includes("video") ||
+      titleToken.includes("photo") ||
+      titleToken.includes("design") ||
+      titleToken.includes("editing")
+    );
+  }
+
+  return false;
+}
+
+function resolveCategoryFromQuery(
+  requestedCategory: string | null,
+  categoryIds: Array<{ id: string; title: string }>,
+  fallbackCategory: string
+) {
+  const requestedToken = normalizeCategoryToken(requestedCategory);
+  if (!requestedToken) {
+    return fallbackCategory;
+  }
+
+  const exactIdMatch = categoryIds.find(
+    (category) => normalizeCategoryToken(category.id) === requestedToken
+  );
+  if (exactIdMatch) {
+    return exactIdMatch.id;
+  }
+
+  const exactTitleMatch = categoryIds.find(
+    (category) => normalizeCategoryToken(category.title) === requestedToken
+  );
+  if (exactTitleMatch) {
+    return exactTitleMatch.id;
+  }
+
+  const aliasedMatch = categoryIds.find((category) =>
+    matchesTokenWithAliases(normalizeCategoryToken(category.title), requestedToken)
+  );
+
+  return aliasedMatch?.id ?? fallbackCategory;
+}
+
 export function CourseGrid() {
   const { categories, courses, loading } = useCatalogData();
   const searchParams = useSearchParams();
   const requestedCategory = searchParams.get("category");
   const fallbackCategory = (categories[0]?.id ?? "academic") as CourseCategory;
-  const validRequestedCategory = categories.some(
-    (category) => category.id === requestedCategory
-  )
-    ? (requestedCategory as CourseCategory)
-    : fallbackCategory;
+  const requestedCategoryToken = normalizeCategoryToken(requestedCategory);
+  const validRequestedCategory = resolveCategoryFromQuery(
+    requestedCategory,
+    categories,
+    fallbackCategory
+  ) as CourseCategory;
 
   const [activeCategory, setActiveCategory] = useState<CourseCategory>(fallbackCategory);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const categoryButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const lastSyncedQueryTokenRef = useRef("");
 
   useEffect(() => {
-    setActiveCategory(validRequestedCategory);
-  }, [validRequestedCategory]);
+    const hasActiveCategory = categories.some((category) => category.id === activeCategory);
+
+    if (!requestedCategoryToken) {
+      if (!hasActiveCategory) {
+        setActiveCategory(fallbackCategory);
+      }
+      lastSyncedQueryTokenRef.current = "";
+      return;
+    }
+
+    const queryChanged = lastSyncedQueryTokenRef.current !== requestedCategoryToken;
+
+    if (queryChanged || !hasActiveCategory) {
+      setActiveCategory(validRequestedCategory);
+    }
+
+    lastSyncedQueryTokenRef.current = requestedCategoryToken;
+  }, [
+    activeCategory,
+    categories,
+    fallbackCategory,
+    requestedCategoryToken,
+    validRequestedCategory,
+  ]);
+
+  useEffect(() => {
+    const activeButton = categoryButtonRefs.current[activeCategory];
+    if (!activeButton) {
+      return;
+    }
+
+    activeButton.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeCategory]);
 
   const activeMeta = useMemo(
     () => categories.find((category) => category.id === activeCategory),
@@ -78,8 +198,11 @@ export function CourseGrid() {
           <div className="flex w-max min-w-full gap-2 snap-x snap-mandatory sm:w-auto sm:min-w-0 sm:flex-wrap sm:gap-3">
             {categoryTabs.map((category) => (
             <button
-              key={category.id}
+              key={category.title}
               type="button"
+              ref={(node) => {
+                categoryButtonRefs.current[category.id] = node;
+              }}
               onClick={() => setActiveCategory(category.id)}
               className={cn(
                 "shrink-0 snap-start rounded-xl border px-3 py-2 text-left text-xs font-bold transition-all sm:px-4 sm:py-2.5 sm:text-sm",
@@ -111,7 +234,7 @@ export function CourseGrid() {
       ) : null}
 
       <div className="rounded-[1.9rem] p-0 dark:border dark:border-white/8 dark:bg-gradient-to-b dark:from-[#0a213c]/65 dark:to-[#071a32]/45 dark:p-3">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={activeCategory}
             className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"

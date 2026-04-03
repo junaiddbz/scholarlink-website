@@ -46,7 +46,12 @@ function buildMetaLabel(item: AnnouncementItem) {
   return "Current update";
 }
 
-export function AnnouncementRail() {
+type AnnouncementRailProps = {
+  sectionId?: string;
+  className?: string;
+};
+
+export function AnnouncementRail({ sectionId = "announcements", className = "" }: AnnouncementRailProps = {}) {
   const { rotatingAnnouncements } = useAnnouncementsData();
   const shouldReduceMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -100,7 +105,7 @@ export function AnnouncementRail() {
   };
 
   return (
-    <section id="announcements" className="mb-12 scroll-mt-28 lg:mb-14">
+    <section id={sectionId} className={`mb-8 scroll-mt-28 sm:mb-10 lg:mb-14 ${className}`.trim()}>
       <motion.div
         className="home-panel rounded-[2.1rem] p-5 sm:p-7"
         initial={{ opacity: 0, y: 16 }}

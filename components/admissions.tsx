@@ -7,9 +7,9 @@ import Link from "next/link";
 
 const steps = [
   { icon: FileEdit, title: "Application", description: "Submit online form", number: "01" },
-  { icon: SearchCheck, title: "Evaluation", description: "Document review", number: "02" },
-  { icon: Users, title: "Interview", description: "Parent & Student", number: "03" },
-  { icon: CheckCircle, title: "Selection", description: "Welcome aboard!", number: "04", featured: true },
+  { icon: SearchCheck, title: "Academic Review", description: "We assess goals, level, and fit.", number: "02" },
+  { icon: Users, title: "Free Demo Session", description: "Attend a trial class before enrollment.", number: "03" },
+  { icon: CheckCircle, title: "Onboarding", description: "Welcome aboard!", number: "04", featured: true },
 ];
 
 export function Admissions() {
@@ -33,7 +33,7 @@ export function Admissions() {
   };
 
   return (
-    <section id="admissions" className="mb-12 scroll-mt-28 lg:mb-14" ref={ref}>
+    <section id="admissions" className="mb-8 scroll-mt-28 sm:mb-10 lg:mb-14" ref={ref}>
       <motion.div
         className="home-panel relative overflow-hidden rounded-[2.5rem] p-5 sm:p-7 lg:p-9"
         initial={{ opacity: 0, y: 20 }}

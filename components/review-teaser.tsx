@@ -15,7 +15,7 @@ export function ReviewTeaser() {
   const teaserItems = useMemo(() => featuredReviews.slice(0, 3), [featuredReviews]);
 
   return (
-    <section id="reviews" className="mb-12 scroll-mt-28 lg:mb-14">
+    <section id="reviews" className="mb-8 scroll-mt-28 sm:mb-10 lg:mb-14">
       <motion.div
         className="home-panel rounded-[2.2rem] p-6 sm:p-8"
         initial={{ opacity: 0, y: 20 }}
