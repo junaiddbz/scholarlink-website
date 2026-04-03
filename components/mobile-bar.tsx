@@ -4,14 +4,24 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MessageCircle, BookOpen, Send } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export function MobileBar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [category, setCategory] = useState("academic");
   const [isRevealed, setIsRevealed] = useState(false);
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
+
+  useEffect(() => {
+    if (pathname !== "/courses") {
+      setCategory("academic");
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    setCategory(params.get("category") || "academic");
+  }, [pathname]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -52,7 +62,6 @@ export function MobileBar() {
   }
 
   const isCoursesPage = pathname === "/courses";
-  const category = searchParams.get("category") || "academic";
 
   const categoryLabel =
     category === "quran"
